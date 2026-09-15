@@ -11,6 +11,8 @@ export const useIncidents = (initialFilters = {}) => {
     status: 'All',
     severity: 'All',
     state: 'All',
+    dateFrom: '',
+    dateTo: '',
     ...initialFilters
   });
   const [selectedIncident, setSelectedIncident] = useState(null);

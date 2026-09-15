@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Search, Download, Plus, Filter, MessageSquare, Repeat, Heart, Eye, X } from 'lucide-react';
 import { Badge } from '../components/common/Badge';
 
 export const Reports = () => {
   const [selectedReport, setSelectedReport] = useState(null);
+  const [filters, setFilters] = useState({
+    search: '',
+    event: 'All Events',
+    state: 'All States',
+    dateRange: 'Last 7 Days',
+    status: 'All',
+    source: 'All'
+  });
 
   const reportRows = [
     { id: "1", datetime: "Apr 30, 2025 • 10:42 AM", location: "Jaipur, Rajasthan", event: "Heavy Rain", source: "X (Twitter)", confidence: "0.92", status: "Verified", freq: 12, severity: "High", handle: "@weather_updates", text: "Heavy rain continues in Jaipur since morning. Roads are waterlogged and traffic is moving slow. #Jaipur #Rain #Weather", img: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=600&q=80" },
@@ -18,7 +26,22 @@ export const Reports = () => {
     { id: "10", datetime: "Apr 30, 2025 • 09:32 AM", location: "Bengaluru, Karnataka", event: "Rain Alert", source: "News", confidence: "0.78", status: "Verified", freq: 3, severity: "Low", handle: "@blr_traffic", text: "Light rain causing slow movement near Silk Board.", img: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=600&q=80" }
   ];
 
-  const activeReport = selectedReport || reportRows[0];
+  const filteredReports = useMemo(() => reportRows.filter((row) => {
+    const query = filters.search.trim().toLowerCase();
+    const reportDate = new Date(row.datetime.replace(' • ', ' '));
+    const latestReportDate = new Date(Math.max(...reportRows.map((item) => new Date(item.datetime.replace(' • ', ' ')).getTime())));
+    const rangeDays = filters.dateRange === 'Last 30 Days' ? 30 : 7;
+    const matchesDate = reportDate >= new Date(latestReportDate.getTime() - rangeDays * 24 * 60 * 60 * 1000);
+    const matchesSearch = !query || [row.location, row.event, row.source, row.text, row.handle]
+      .some((value) => value.toLowerCase().includes(query));
+    const matchesEvent = filters.event === 'All Events' || row.event === filters.event;
+    const matchesState = filters.state === 'All States' || row.location.endsWith(filters.state);
+    const matchesStatus = filters.status === 'All' || row.status === filters.status;
+    const matchesSource = filters.source === 'All' || row.source === filters.source;
+    return matchesDate && matchesSearch && matchesEvent && matchesState && matchesStatus && matchesSource;
+  }), [filters]);
+
+  const activeReport = filteredReports.includes(selectedReport) ? selectedReport : filteredReports[0];
 
   return (
     <div className="space-y-6 pb-12">
@@ -51,6 +74,8 @@ export const Reports = () => {
             <input
               type="text"
               placeholder="Search by location, event, source, etc..."
+              value={filters.search}
+              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               className="w-full bg-slate-50 text-xs font-medium text-slate-900 pl-9 pr-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -65,18 +90,19 @@ export const Reports = () => {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-semibold text-slate-700 pt-1">
           <div>
             <span className="text-[10px] text-slate-400 font-bold block mb-1">Event Type</span>
-            <select className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            <select value={filters.event} onChange={(e) => setFilters((prev) => ({ ...prev, event: e.target.value }))} className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
               <option>All Events</option>
               <option>Heavy Rain</option>
               <option>Flood Alert</option>
               <option>Cyclone</option>
               <option>Heatwave</option>
+              <option>Active Incident</option>
             </select>
           </div>
 
           <div>
             <span className="text-[10px] text-slate-400 font-bold block mb-1">State</span>
-            <select className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            <select value={filters.state} onChange={(e) => setFilters((prev) => ({ ...prev, state: e.target.value }))} className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
               <option>All States</option>
               <option>Rajasthan</option>
               <option>Bihar</option>
@@ -87,7 +113,7 @@ export const Reports = () => {
 
           <div>
             <span className="text-[10px] text-slate-400 font-bold block mb-1">Date Range</span>
-            <select className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            <select value={filters.dateRange} onChange={(e) => setFilters((prev) => ({ ...prev, dateRange: e.target.value }))} className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
               <option>Last 7 Days</option>
               <option>Last 30 Days</option>
             </select>
@@ -95,7 +121,7 @@ export const Reports = () => {
 
           <div>
             <span className="text-[10px] text-slate-400 font-bold block mb-1">Verification Status</span>
-            <select className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            <select value={filters.status} onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))} className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
               <option>All</option>
               <option>Verified</option>
               <option>Under Review</option>
@@ -105,7 +131,7 @@ export const Reports = () => {
 
           <div>
             <span className="text-[10px] text-slate-400 font-bold block mb-1">Source</span>
-            <select className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
+            <select value={filters.source} onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value }))} className="w-full bg-white p-2 rounded-xl border border-slate-200 text-xs font-semibold">
               <option>All</option>
               <option>X (Twitter)</option>
               <option>News</option>
@@ -136,7 +162,12 @@ export const Reports = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {reportRows.map((row) => (
+              {filteredReports.length === 0 && (
+                <tr>
+                  <td colSpan="9" className="p-8 text-center text-slate-500">No reports match the selected filters.</td>
+                </tr>
+              )}
+              {filteredReports.map((row) => (
                 <tr
                   key={row.id}
                   onClick={() => setSelectedReport(row)}
@@ -171,7 +202,7 @@ export const Reports = () => {
 
         {/* Pagination Bar */}
         <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
-          <div>Showing 1-10 of 1,248 reports</div>
+          <div>Showing {filteredReports.length ? `1-${filteredReports.length}` : '0'} of {filteredReports.length} reports</div>
           <div className="flex items-center gap-1 font-semibold">
             <button className="px-2 py-1 rounded bg-white border border-slate-200 text-slate-600">&lt;</button>
             <button className="px-3 py-1 rounded bg-blue-600 text-white">1</button>
@@ -187,7 +218,7 @@ export const Reports = () => {
       </div>
 
       {/* Bottom Section Inspector Drawer / Split Card matching Image 2 (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+      {activeReport && <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
         
         {/* Left: Social Post Preview Card */}
         <div className="lg:col-span-6 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
@@ -267,7 +298,7 @@ export const Reports = () => {
           </div>
         </div>
 
-      </div>
+      </div>}
 
     </div>
   );

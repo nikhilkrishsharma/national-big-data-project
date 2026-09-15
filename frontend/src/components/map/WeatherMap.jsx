@@ -51,16 +51,11 @@ export const WeatherMap = ({ incidents = [], selectedIncident, onSelectIncident 
   const [mapCenter, setMapCenter] = useState(INDIA_CENTER);
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
 
-  const clusterPoints = [
-    { id: 1, lat: 26.9124, lng: 75.7873, count: 12, title: "Jaipur, Rajasthan", type: "Heavy Rain", status: "Verified", color: "#2563eb" },
-    { id: 2, lat: 25.5941, lng: 85.1376, count: 5, title: "Patna, Bihar", type: "Flood Alert", status: "Under Review", color: "#eab308" },
-    { id: 3, lat: 19.0760, lng: 72.8777, count: 8, title: "Mumbai, Maharashtra", type: "Heavy Rain", status: "Verified", color: "#2563eb" },
-    { id: 4, lat: 17.6868, lng: 83.2185, count: 6, title: "Visakhapatnam, Andhra Pradesh", type: "Cyclone", status: "Under Review", color: "#9333ea" },
-    { id: 5, lat: 21.1458, lng: 79.0882, count: 4, title: "Nagpur, Maharashtra", type: "Heatwave", status: "Unverified", color: "#ef4444" },
-    { id: 6, lat: 22.5726, lng: 88.3639, count: 15, title: "Kolkata, West Bengal", type: "Flood Alert", status: "Verified", color: "#06b6d4" },
-    { id: 7, lat: 13.0827, lng: 80.2707, count: 9, title: "Chennai, Tamil Nadu", type: "Heavy Rain", status: "Verified", color: "#2563eb" },
-    { id: 8, lat: 26.1445, lng: 91.7362, count: 7, title: "Guwahati, Assam", type: "Active Incident", status: "Verified", color: "#ef4444" }
-  ];
+  const clusterPoints = incidents.filter((incident) => incident.lat && incident.lng).map((incident) => ({
+    ...incident,
+    count: 1,
+    color: incident.severity === 'Critical' ? '#dc2626' : incident.severity === 'High' ? '#f97316' : '#2563eb'
+  }));
 
   return (
     <div className="relative w-full h-full min-h-[540px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">

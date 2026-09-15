@@ -20,11 +20,13 @@ class IncidentService {
     }
 
     if (filters.type && filters.type !== "All") {
-      result = result.filter((i) => i.type === filters.type);
+      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      result = result.filter((i) => types.includes(i.type));
     }
 
     if (filters.status && filters.status !== "All") {
-      result = result.filter((i) => i.status === filters.status);
+      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
+      result = result.filter((i) => statuses.includes(i.status));
     }
 
     if (filters.severity && filters.severity !== "All") {
@@ -33,6 +35,14 @@ class IncidentService {
 
     if (filters.state && filters.state !== "All") {
       result = result.filter((i) => i.location.includes(filters.state));
+    }
+
+    if (filters.dateFrom) {
+      result = result.filter((i) => new Date(i.timestamp) >= new Date(`${filters.dateFrom}T00:00:00`));
+    }
+
+    if (filters.dateTo) {
+      result = result.filter((i) => new Date(i.timestamp) <= new Date(`${filters.dateTo}T23:59:59`));
     }
 
     return mockFetch(result);
