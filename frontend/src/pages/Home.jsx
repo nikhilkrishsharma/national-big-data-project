@@ -1,22 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  FileEdit, 
-  CloudRain, 
-  Waves, 
-  RotateCw, 
-  Sun, 
-  AlertTriangle, 
-  Radio, 
-  Brain, 
-  MapPin, 
-  Bell, 
-  BarChart3, 
-  Users, 
-  Cloud, 
-  CloudLightning, 
-  ChevronRight 
+import {
+  Search,
+  FileEdit,
+  CloudRain,
+  Waves,
+  RotateCw,
+  Sun,
+  AlertTriangle,
+  Radio,
+  Brain,
+  MapPin,
+  Bell,
+  BarChart3,
+  Users,
+  Cloud,
+  CloudLightning,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -87,10 +87,10 @@ export const Home = () => {
 
   return (
     <div className="space-y-10 pb-12">
-      
+
       {/* Top Hero Section matching Image 1 */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-4">
-        
+
         {/* Hero Left Content */}
         <div className="lg:col-span-6 space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-semibold">
@@ -127,41 +127,21 @@ export const Home = () => {
 
         {/* Hero Center Vector India Map Graphic */}
         <div className="lg:col-span-3 flex justify-center relative">
-          <div className="relative w-full max-w-sm aspect-square bg-gradient-to-b from-blue-50/80 to-sky-100/50 rounded-3xl p-6 border border-blue-100/80 shadow-sm flex items-center justify-center">
+          <div className="relative w-full max-w-md aspect-[4/4.2] bg-gradient-to-b from-sky-100/80 via-blue-50/40 to-sky-100/60 rounded-3xl p-3 sm:p-5 flex items-center justify-center overflow-hidden">
             
-            {/* SVG India Map Silhouette */}
-            <svg viewBox="0 0 200 220" className="w-full h-full opacity-60 text-blue-400 fill-current">
-              <path d="M100,10 C110,20 130,25 140,40 C150,55 160,70 155,90 C150,110 170,120 160,140 C150,160 130,170 110,200 C95,205 90,190 80,180 C70,170 50,150 45,130 C40,110 50,90 60,70 C70,50 85,30 100,10 Z" />
-            </svg>
+            {/* Real India Weather Map Image matching reference design */}
+            <img 
+              src="/india-weather-map.png" 
+              alt="India Real-Time Weather Intelligence Map" 
+              className="w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(56,189,248,0.2)] hover:scale-[1.02] transition-transform duration-500" 
+            />
 
-            {/* Circular Marker Badges on Map */}
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <CloudRain className="w-4 h-4" />
-            </div>
+            {/* Interactive Pulse Hotspots over key regional zones */}
+            <div className="absolute top-[8%] left-[46%] -translate-x-1/2 w-8 h-8 rounded-full bg-blue-500/20 animate-ping pointer-events-none" />
+            <div className="absolute top-[28%] left-[51%] -translate-x-1/2 w-8 h-8 rounded-full bg-rose-500/20 animate-ping pointer-events-none" />
+            <div className="absolute top-[35%] right-[14%] translate-x-1/2 w-8 h-8 rounded-full bg-amber-500/20 animate-ping pointer-events-none" />
+            <div className="absolute top-[52%] right-[36%] translate-x-1/2 w-8 h-8 rounded-full bg-emerald-500/20 animate-ping pointer-events-none" />
 
-            <div className="absolute top-1/4 left-1/3 w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
-              <Sun className="w-4 h-4" />
-            </div>
-
-            <div className="absolute top-1/3 right-8 w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 animate-pulse">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-
-            <div className="absolute top-1/2 left-8 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <CloudRain className="w-4 h-4" />
-            </div>
-
-            <div className="absolute bottom-1/3 right-1/3 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <Waves className="w-4 h-4" />
-            </div>
-
-            <div className="absolute bottom-12 left-1/2 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <CloudRain className="w-4 h-4" />
-            </div>
-
-            <div className="absolute top-1/2 right-12 w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center shadow-lg">
-              <Sun className="w-4 h-4" />
-            </div>
           </div>
         </div>
 
@@ -217,7 +197,7 @@ export const Home = () => {
 
       {/* Bottom Row: Live Weather Snapshot + Recent Alerts */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
-        
+
         {/* Left Column: Live Weather Snapshot */}
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between">
