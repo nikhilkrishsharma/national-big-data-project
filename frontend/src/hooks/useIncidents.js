@@ -5,6 +5,7 @@ export const useIncidents = (initialFilters = {}) => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [filters, setFilters] = useState({
     search: '',
     type: 'All',
@@ -15,12 +16,15 @@ export const useIncidents = (initialFilters = {}) => {
     dateTo: '',
     ...initialFilters
   });
+
   const [selectedIncident, setSelectedIncident] = useState(null);
 
   const fetchIncidents = useCallback(async () => {
     setLoading(true);
+
     try {
       const res = await incidentService.getAllIncidents(filters);
+
       setIncidents(res.data);
       setError(null);
     } catch (err) {
@@ -30,20 +34,40 @@ export const useIncidents = (initialFilters = {}) => {
     }
   }, [filters]);
 
+  // Initial load + reload whenever filters change
   useEffect(() => {
     fetchIncidents();
   }, [fetchIncidents]);
 
+  // Listen for newly created/updated incidents
+  useEffect(() => {
+    const unsubscribe = incidentService.subscribe(() => {
+      fetchIncidents();
+    });
+
+    return unsubscribe;
+  }, [fetchIncidents]);
+
   const updateFilters = (newFilters) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters
+    }));
   };
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const updated = await incidentService.updateIncidentStatus(id, newStatus);
-      setIncidents((prev) =>
-        prev.map((item) => (item.id === id ? updated.data : item))
+      const updated = await incidentService.updateIncidentStatus(
+        id,
+        newStatus
       );
+
+      setIncidents((prev) =>
+        prev.map((item) =>
+          item.id === id ? updated.data : item
+        )
+      );
+
       if (selectedIncident?.id === id) {
         setSelectedIncident(updated.data);
       }
