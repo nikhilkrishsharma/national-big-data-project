@@ -1,238 +1,504 @@
 import React from 'react';
+
 import { EventTrendChart } from '../components/analytics/EventTrendChart';
 import { EventDistribution } from '../components/analytics/EventDistribution';
 import { StateActivity } from '../components/analytics/StateActivity';
 import { Card } from '../components/common/Card';
-import { 
-  CheckCircle2, 
-  AlertTriangle, 
-  ShieldCheck, 
-  TrendingUp, 
-  ArrowUpRight, 
-  PieChart as PieIcon, 
-  CloudRain, 
-  Waves, 
-  Sun, 
-  RotateCw 
+import { useAnalytics } from '../hooks/useAnalytics';
+
+import {
+  CheckCircle2,
+  AlertTriangle,
+  ShieldCheck,
+  ArrowUpRight,
+  PieChart as PieIcon
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip
+} from 'recharts';
 
 export const Analytics = () => {
+  const {
+    analytics,
+    loading,
+    error
+  } = useAnalytics();
+
+  // ---------------------------------------------
+  // LOADING
+  // ---------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="p-6 text-sm text-slate-500">
+        Loading analytics...
+      </div>
+    );
+  }
+
+  // ---------------------------------------------
+  // ERROR
+  // ---------------------------------------------
+
+  if (error) {
+    return (
+      <div className="p-6 text-sm text-red-500">
+        Failed to load analytics: {error}
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return null;
+  }
+
+  // ---------------------------------------------
+  // VERIFICATION DATA
+  // ---------------------------------------------
+
   const verificationData = [
-    { name: "Verified", value: 72, color: "#10b981" },
-    { name: "Under Review", value: 18, color: "#f59e0b" },
-    { name: "Unverified", value: 10, color: "#ef4444" }
+    {
+      name: 'Verified',
+      value: analytics.verified,
+      color: '#10b981'
+    },
+    {
+      name: 'Under Review',
+      value: analytics.underReview,
+      color: '#f59e0b'
+    },
+    {
+      name: 'Unverified',
+      value: analytics.unverified,
+      color: '#ef4444'
+    }
   ];
 
-  const sourceData = [
-    { name: "Social Media", pct: "62%" },
-    { name: "News", pct: "18%" },
-    { name: "APIs", pct: "12%" },
-    { name: "Citizen Reports", pct: "8%" }
-  ];
+  // ---------------------------------------------
+  // SOURCE DATA
+  // ---------------------------------------------
+
+  const sourceData =
+    analytics.sourceDistribution.map(
+      (source) => ({
+        name: source.name,
+        pct: `${source.percentage}%`
+      })
+    );
+
+  // ---------------------------------------------
+  // ACTUAL CURRENT INCIDENT RECORDS
+  // ---------------------------------------------
+
+  const activeIncidents =
+    analytics.verified +
+    analytics.underReview +
+    analytics.unverified;
+
+  // ---------------------------------------------
+  // VERIFICATION PERCENTAGES
+  // ---------------------------------------------
+
+  const verifiedPercentage =
+    activeIncidents > 0
+      ? Math.round(
+          (analytics.verified / activeIncidents) * 100
+        )
+      : 0;
+
+  const underReviewPercentage =
+    activeIncidents > 0
+      ? Math.round(
+          (analytics.underReview / activeIncidents) * 100
+        )
+      : 0;
+
+  const unverifiedPercentage =
+    activeIncidents > 0
+      ? Math.round(
+          (analytics.unverified / activeIncidents) * 100
+        )
+      : 0;
 
   return (
     <div className="space-y-6 pb-12">
-      
-      {/* Header matching Image 2 (Middle) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+      {/* =========================================
+          HEADER
+      ========================================= */}
+
+      <div className="flex items-center justify-between">
+
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Analytics</h1>
-          <p className="text-xs text-slate-500 font-medium">Real-time insights and trends from weather data</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Analytics
+          </h1>
+
+          <p className="text-sm text-slate-500">
+            Real-time insights and trends from weather data
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <select className="bg-white text-xs font-semibold text-slate-700 px-3 py-1.5 rounded-xl border border-slate-300 shadow-sm focus:outline-none">
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="monsoon">Monsoon Season</option>
+
+          <select className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm outline-none">
+            <option>Last 7 Days</option>
+            <option>Last 30 Days</option>
+            <option>Last 90 Days</option>
           </select>
 
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Live</span>
+          <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-600">
+
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+
+            Live
+
           </div>
+
         </div>
+
       </div>
 
-      {/* Top 4 KPI Cards matching Image 2 (Middle) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* KPI 1: Verified Reports */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-            <span>Verified Reports</span>
-            <CheckCircle2 className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-mono">1,248</div>
-          <div className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-            <ArrowUpRight className="w-4 h-4" />
-            <span>12%</span>
-            <span className="text-[11px] text-slate-400 font-medium ml-1">vs. previous 7 days</span>
-          </div>
-        </div>
+      {/* =========================================
+          KPI CARDS
+      ========================================= */}
 
-        {/* KPI 2: Active Incidents */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-            <span>Active Incidents</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-mono">186</div>
-          <div className="flex items-center gap-1 text-xs font-bold text-rose-600">
-            <ArrowUpRight className="w-4 h-4" />
-            <span>8%</span>
-            <span className="text-[11px] text-slate-400 font-medium ml-1">vs. previous 7 days</span>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
 
-        {/* KPI 3: Source Distribution */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-            <span>Source Distribution</span>
-            <PieIcon className="w-4 h-4 text-sky-500" />
+        {/* VERIFIED REPORTS */}
+
+        <Card className="p-6">
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-sm font-medium text-slate-500">
+              Verified Reports
+            </span>
+
+            <CheckCircle2 className="h-5 w-5 text-blue-600" />
+
           </div>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] font-semibold text-slate-700 pt-1">
-            {sourceData.map((s) => (
-              <div key={s.name} className="flex items-center justify-between">
-                <span className="text-slate-500">{s.name}</span>
-                <span className="font-bold text-slate-900 font-mono">{s.pct}</span>
+
+          <div className="mt-4 text-3xl font-bold text-slate-900">
+            {analytics.verified}
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 text-sm">
+
+            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
+
+            <span className="text-emerald-500">
+              Live
+            </span>
+
+            <span className="text-slate-400">
+              from current incidents
+            </span>
+
+          </div>
+
+        </Card>
+
+        {/* ACTIVE INCIDENTS */}
+
+        <Card className="p-6">
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-sm font-medium text-slate-500">
+              Active Incidents
+            </span>
+
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+
+          </div>
+
+          <div className="mt-4 text-3xl font-bold text-slate-900">
+            {activeIncidents}
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 text-sm">
+
+            <ArrowUpRight className="h-4 w-4 text-red-500" />
+
+            <span className="text-red-500">
+              Live
+            </span>
+
+            <span className="text-slate-400">
+              current incident records
+            </span>
+
+          </div>
+
+        </Card>
+
+        {/* SOURCE DISTRIBUTION */}
+
+        <Card className="p-6">
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-sm font-medium text-slate-500">
+              Source Distribution
+            </span>
+
+            <PieIcon className="h-5 w-5 text-cyan-500" />
+
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+
+            {sourceData.map((source) => (
+              <div
+                key={source.name}
+                className="flex items-center justify-between gap-2 text-sm"
+              >
+
+                <span className="truncate text-slate-600">
+                  {source.name}
+                </span>
+
+                <span className="font-semibold text-slate-900">
+                  {source.pct}
+                </span>
+
               </div>
             ))}
-          </div>
-        </div>
 
-        {/* KPI 4: Avg. AI Confidence */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold">
-            <span>Avg. AI Confidence</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-mono">0.87</div>
-          <div className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-            <ArrowUpRight className="w-4 h-4" />
-            <span>6%</span>
-            <span className="text-[11px] text-slate-400 font-medium ml-1">vs. previous 7 days</span>
+
+        </Card>
+
+        {/* AVG AI CONFIDENCE */}
+
+        <Card className="p-6">
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-sm font-medium text-slate-500">
+              Avg. AI Confidence
+            </span>
+
+            <ShieldCheck className="h-5 w-5 text-emerald-500" />
+
           </div>
-        </div>
+
+          <div className="mt-4 text-3xl font-bold text-slate-900">
+            {analytics.avgConfidence.toFixed(2)}
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 text-sm">
+
+            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
+
+            <span className="text-emerald-500">
+              Live
+            </span>
+
+            <span className="text-slate-400">
+              calculated from incidents
+            </span>
+
+          </div>
+
+        </Card>
 
       </div>
 
-      {/* Row 2: Incidents Over Time + Event Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
+      {/* =========================================
+          INCIDENTS OVER TIME + EVENT DISTRIBUTION
+          ORIGINAL STRUCTURE
+      ========================================= */}
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+
+        {/* INCIDENTS OVER TIME */}
+
+        <div className="xl:col-span-3">
+
           <EventTrendChart />
+
         </div>
-        <div className="lg:col-span-5">
-          <EventDistribution />
+
+        {/* EVENT DISTRIBUTION */}
+
+        <div className="xl:col-span-2">
+
+          <EventDistribution
+            totalIncidents={
+              analytics.totalIncidents
+            }
+          />
+
         </div>
+
       </div>
 
-      {/* Row 3: State-wise Activity + Verification Outcomes */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
+      {/* =========================================
+          STATE-WISE ACTIVITY + VERIFICATION OUTCOMES
+          ORIGINAL STRUCTURE
+      ========================================= */}
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+
+        {/* STATE-WISE ACTIVITY */}
+
+        <div className="xl:col-span-3">
+
           <StateActivity />
+
         </div>
 
-        <div className="lg:col-span-5">
-          <Card title="Verification Outcomes">
-            <div className="h-64 w-full relative flex items-center justify-center">
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-extrabold text-slate-900 font-mono">1,248</span>
-                <span className="text-[10px] font-semibold text-slate-400">Total Reports</span>
-              </div>
+        {/* VERIFICATION OUTCOMES */}
 
-              <ResponsiveContainer width="100%" height="100%">
+        <Card className="xl:col-span-2 p-6">
+
+          <div className="mb-4">
+
+            <h2 className="text-lg font-semibold text-slate-900">
+              Verification Outcomes
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Current verification breakdown
+            </p>
+
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+
+            {/* DONUT */}
+
+            <div className="relative h-[300px]">
+
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+
                 <PieChart>
+
                   <Pie
                     data={verificationData}
+                    dataKey="value"
+                    nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
+                    innerRadius={65}
+                    outerRadius={105}
                     paddingAngle={3}
-                    dataKey="value"
                   >
-                    {verificationData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
-                    ))}
+
+                    {verificationData.map(
+                      (entry) => (
+                        <Cell
+                          key={entry.name}
+                          fill={entry.color}
+                        />
+                      )
+                    )}
+
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#ffffff',
-                      borderColor: '#e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
+
+                  <Tooltip />
+
                 </PieChart>
+
               </ResponsiveContainer>
+
+              {/* CENTER */}
+
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+
+                <span className="text-2xl font-bold text-slate-900">
+                  {activeIncidents.toLocaleString()}
+                </span>
+
+                <span className="text-sm text-slate-400">
+                  Total Reports
+                </span>
+
+              </div>
+
             </div>
 
-            <div className="flex justify-center gap-6 pt-2 border-t border-slate-100 text-xs font-semibold">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span>Verified 72%</span>
+          </div>
+
+          {/* VERIFICATION LEGEND */}
+
+          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4">
+
+            {/* VERIFIED */}
+
+            <div className="text-center">
+
+              <div className="flex items-center justify-center gap-2">
+
+                <span className="h-3 w-3 rounded-full bg-emerald-500" />
+
+                <span className="text-sm font-medium text-slate-900">
+                  Verified
+                </span>
+
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                <span>Under Review 18%</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <span>Unverified 10%</span>
-              </div>
+
+              <p className="mt-1 text-sm font-semibold text-emerald-500">
+                {verifiedPercentage}%
+              </p>
+
             </div>
-          </Card>
-        </div>
+
+            {/* UNDER REVIEW */}
+
+            <div className="text-center">
+
+              <div className="flex items-center justify-center gap-2">
+
+                <span className="h-3 w-3 rounded-full bg-amber-500" />
+
+                <span className="text-sm font-medium text-slate-900">
+                  Under Review
+                </span>
+
+              </div>
+
+              <p className="mt-1 text-sm font-semibold text-amber-500">
+                {underReviewPercentage}%
+              </p>
+
+            </div>
+
+            {/* UNVERIFIED */}
+
+            <div className="text-center">
+
+              <div className="flex items-center justify-center gap-2">
+
+                <span className="h-3 w-3 rounded-full bg-red-500" />
+
+                <span className="text-sm font-medium text-slate-900">
+                  Unverified
+                </span>
+
+              </div>
+
+              <p className="mt-1 text-sm font-semibold text-red-500">
+                {unverifiedPercentage}%
+              </p>
+
+            </div>
+
+          </div>
+
+        </Card>
+
       </div>
-
-      {/* Row 4: Trend Analysis Cards Grid matching reference */}
-      <Card title="Trend Analysis">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-          
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-            <div className="flex items-center gap-2 text-blue-600 font-bold text-xs">
-              <CloudRain className="w-4 h-4" />
-              <span>Heavy Rain</span>
-            </div>
-            <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-              Incidents increased by 45% compared to last week.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-            <div className="flex items-center gap-2 text-sky-600 font-bold text-xs">
-              <Waves className="w-4 h-4" />
-              <span>Flood Alerts</span>
-            </div>
-            <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-              Highest activity in Uttar Pradesh & Bihar.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-            <div className="flex items-center gap-2 text-amber-600 font-bold text-xs">
-              <Sun className="w-4 h-4" />
-              <span>Heatwave</span>
-            </div>
-            <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-              Rising trend in central and western regions.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-            <div className="flex items-center gap-2 text-purple-600 font-bold text-xs">
-              <RotateCw className="w-4 h-4" />
-              <span>Cyclone</span>
-            </div>
-            <p className="text-xs text-slate-600 font-medium leading-relaxed pt-1">
-              No new cyclone activity in the last 7 days.
-            </p>
-          </div>
-
-        </div>
-      </Card>
 
     </div>
   );

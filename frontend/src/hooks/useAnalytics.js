@@ -1,35 +1,65 @@
-import { useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback
+} from 'react';
+
 import { analyticsService } from '../services/analyticsService';
+import { incidentService } from '../services/incidentService';
 
 export const useAnalytics = () => {
-  const [analytics, setAnalytics] = useState(null);
-  const [weatherSnapshot, setWeatherSnapshot] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [analytics, setAnalytics] =
+    useState(null);
 
-  useEffect(() => {
-    const loadAnalytics = async () => {
-      setLoading(true);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState(null);
+
+  const loadAnalytics =
+    useCallback(async () => {
       try {
-        const [analyticsRes, weatherRes] = await Promise.all([
-          analyticsService.getDashboardAnalytics(),
-          analyticsService.getWeatherSnapshot()
-        ]);
-        setAnalytics(analyticsRes.data);
-        setWeatherSnapshot(weatherRes.data);
+        setLoading(true);
+
+        const response =
+          await analyticsService.getDashboardAnalytics();
+
+        setAnalytics(response.data);
+
+        setError(null);
       } catch (err) {
+        console.error(
+          'Failed to load analytics:',
+          err
+        );
+
         setError(err.message);
       } finally {
         setLoading(false);
       }
-    };
+    }, []);
+
+  // Initial load
+  useEffect(() => {
     loadAnalytics();
-  }, []);
+  }, [loadAnalytics]);
+
+  // Update Analytics whenever
+  // a new incident is created/updated
+  useEffect(() => {
+    const unsubscribe =
+      incidentService.subscribe(() => {
+        loadAnalytics();
+      });
+
+    return unsubscribe;
+  }, [loadAnalytics]);
 
   return {
     analytics,
-    weatherSnapshot,
     loading,
-    error
+    error,
+    refetch: loadAnalytics
   };
 };

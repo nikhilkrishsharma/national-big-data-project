@@ -51,10 +51,20 @@ export const WeatherMap = ({ incidents = [], selectedIncident, onSelectIncident 
   const [mapCenter, setMapCenter] = useState(INDIA_CENTER);
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
 
-  const clusterPoints = incidents.filter((incident) => incident.lat && incident.lng).map((incident) => ({
+  const clusterPoints = incidents
+  .filter((incident) => incident.lat && incident.lng)
+  .map((incident) => ({
     ...incident,
-    count: 1,
-    color: incident.severity === 'Critical' ? '#dc2626' : incident.severity === 'High' ? '#f97316' : '#2563eb'
+
+    // Use the actual frequency of this incident
+    count: incident.freq || 1,
+
+    color:
+      incident.severity === 'Critical'
+        ? '#dc2626'
+        : incident.severity === 'High'
+        ? '#f97316'
+        : '#2563eb'
   }));
 
   return (
